@@ -1,4 +1,6 @@
 ﻿using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using SpaceBallsBot.Commands;
 
 namespace SpaceBallsBot;
 
@@ -19,6 +21,13 @@ internal static class Program
             TokenType = TokenType.Bot,
             Intents = DiscordIntents.All
         });
+
+        var commands = discord.UseCommandsNext(new CommandsNextConfiguration
+        {
+            StringPrefixes = new[] { "tf_" }
+        });
+
+        commands.RegisterCommands<SampleModule>();
 
         discord.MessageCreated += MessageCreated.Handler;
 

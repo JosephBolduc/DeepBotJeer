@@ -1,3 +1,4 @@
+using System.Text;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 
@@ -26,7 +27,11 @@ public static class MessageCreated
                 await Task.Delay(5000);
                 await e.Message.RespondAsync("thank you for your understanding");
             });
-
-        Console.WriteLine(e.Message.Content);
+        var builder = new StringBuilder();
+        builder.Append(e.Guild.Name + " :: ");
+        builder.Append(e.Channel.Name + " :: ");
+        builder.Append(e.Author.Username + " :: ");
+        builder.Append(e.Message.Content);
+        Console.WriteLine(builder.ToString());
     }
 }

@@ -2,7 +2,7 @@ namespace SpaceBallsBot;
 
 public static class Startup
 {
-    private static readonly string TokenFile = "credentials.txt";
+    private const string TokenFile = "credentials.txt";
 
     public static void Initialize()
     {
@@ -42,8 +42,8 @@ public static class Startup
         while (true)
         {
             Thread.Sleep(60 * 1000);
-            Console.WriteLine("Ran GC");
             GC.Collect();
+            // Console.WriteLine("Ran GC");
         }
     }
 }
