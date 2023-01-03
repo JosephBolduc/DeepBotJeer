@@ -2,7 +2,7 @@ using System.Collections;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 
-namespace DeepBotJeer;
+namespace SpaceBallsBot;
 
 public static class ChatReactions
 {

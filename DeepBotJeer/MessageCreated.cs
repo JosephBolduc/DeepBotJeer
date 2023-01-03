@@ -1,7 +1,7 @@
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 
-namespace DeepBotJeer;
+namespace SpaceBallsBot;
 
 public static class MessageCreated
 {

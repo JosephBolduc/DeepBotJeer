@@ -1,6 +1,6 @@
 ﻿using DSharpPlus;
 
-namespace DeepBotJeer;
+namespace SpaceBallsBot;
 
 internal static class Program
 {

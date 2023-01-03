@@ -1,4 +1,4 @@
-namespace DeepBotJeer;
+namespace SpaceBallsBot;
 
 public static class Startup
 {
