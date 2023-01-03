@@ -12,16 +12,13 @@ public static class MessageCreated
         ChatReactions.Handler(s, e);
 
         if (e.Message.Content.ToLower().StartsWith("ping"))
-        {
             _ = Task.Run(async () =>
             {
                 await Task.Delay(3000);
                 await e.Message.RespondAsync("bonk!");
             });
-        }
 
         if (e.Message.Content.Equals("<@1058823504776134696> what have you done."))
-        {
             _ = Task.Run(async () =>
             {
                 await Task.Delay(500);
@@ -29,7 +26,6 @@ public static class MessageCreated
                 await Task.Delay(5000);
                 await e.Message.RespondAsync("thank you for your understanding");
             });
-        }
 
         Console.WriteLine(e.Message.Content);
     }

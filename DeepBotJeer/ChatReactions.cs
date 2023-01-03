@@ -6,13 +6,13 @@ namespace DeepBotJeer;
 
 public static class ChatReactions
 {
-    private static readonly Random Rng = new Random();
+    private static readonly Random Rng = new();
 
     private static readonly ulong[] TargetedUsers =
     {
         294937952314851329, // addison
         241958250931683329, // hank
-        300507901892624385, // me
+        300507901892624385 // me
     };
 
     private static readonly string[] BombWords =
@@ -27,23 +27,24 @@ public static class ChatReactions
         "urea nitrate",
         "triacetone triperoxide",
         "tannerite",
-        "academy sports and outdoors",
+        "academy sports and outdoors"
     };
+
+    private static readonly ArrayList UsedGifIndexes = new();
 
     public static async void Handler(DiscordClient s, MessageCreateEventArgs e)
     {
+        if (BombWords.Any(e.Message.Content.ToLower().Contains))
+        {
+            var response = CreateThreat();
+            await e.Channel.SendMessageAsync(response);
+        }
+
         if (!TargetedUsers.Contains(e.Author.Id)) return;
 
         if (Rng.Next(30) == 0)
         {
-            string response = RandomReactionGif();
-            await e.Channel.SendMessageAsync(response);
-            return;
-        }
-
-        if (BombWords.Any(e.Message.Content.Contains))
-        {
-            string response = CreateThreat();
+            var response = RandomReactionGif();
             await e.Channel.SendMessageAsync(response);
         }
     }
@@ -60,17 +61,17 @@ public static class ChatReactions
             "pl_thundermountain",
             "pl_snowycoast",
             "plr_bananabay",
-            "plr_hightower",
+            "plr_hightower"
         };
         string[] cart =
         {
             "payload",
             "bomb",
-            "cart",
+            "cart"
         };
 
         // Creating the sentence, starting at normal english
-        string response = "";
+        var response = "";
         if (Rng.Next(3) == 0) response += "Ok so imagine ";
         response += maps[Rng.Next(maps.Length)];
         response += " but instead I push the ";
@@ -94,8 +95,6 @@ public static class ChatReactions
 
         return response;
     }
-
-    private static readonly ArrayList UsedGifIndexes = new ArrayList();
 
     private static string RandomReactionGif()
     {
@@ -132,14 +131,12 @@ public static class ChatReactions
 
     private static string Exclam()
     {
-        int length = Rng.Next(4, 15);
-        string response = "";
+        var length = Rng.Next(4, 15);
+        var response = "";
 
-        for (int i = 0; i < length; i++)
-        {
+        for (var i = 0; i < length; i++)
             if (Rng.Next(i) == 0) response += "!";
             else response += "1";
-        }
 
         return response;
     }
