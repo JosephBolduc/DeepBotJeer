@@ -8,10 +8,14 @@
         <Company>Bolduc Engineering</Company>
         <AssemblyVersion>0.1.0</AssemblyVersion>
         <FileVersion>0.1.0</FileVersion>
+        <IsPackable>false</IsPackable>
+        <Version>0.1.0</Version>
+        <NeutralLanguage>en-US</NeutralLanguage>
+        <ApplicationIcon>favicon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="DSharpPlus" Version="4.3.0" />
+        <PackageReference Include="DSharpPlus" Version="4.3.0"/>
     </ItemGroup>
 
 </Project>
