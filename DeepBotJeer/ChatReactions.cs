@@ -12,6 +12,7 @@ public static class ChatReactions
     {
         294937952314851329, // addison
         241958250931683329, // hank
+        254661838497644544, // ben
         300507901892624385 // me
     };
 
@@ -27,7 +28,8 @@ public static class ChatReactions
         "urea nitrate",
         "triacetone triperoxide",
         "tannerite",
-        "academy sports and outdoors"
+        "academy sports and outdoors",
+        "thermite"
     };
 
     private static readonly ArrayList UsedGifIndexes = new();
@@ -39,6 +41,9 @@ public static class ChatReactions
             var response = CreateThreat();
             await e.Channel.SendMessageAsync(response);
         }
+
+        if (e.Message.Content.ToLower().Contains("zaza"))
+            await e.Message.RespondAsync("when you outside and smell that zaza breh");
 
         if (!TargetedUsers.Contains(e.Author.Id)) return;
 
