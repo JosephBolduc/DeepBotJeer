@@ -1,8 +1,9 @@
 using System.Text;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
+using SpaceBallsBot;
 
-namespace SpaceBallsBot;
+namespace SpaceballsBot.Event_Handlers;
 
 public static class MessageCreated
 {
@@ -28,9 +29,9 @@ public static class MessageCreated
                 await e.Message.RespondAsync("thank you for your understanding");
             });
         var builder = new StringBuilder();
-        builder.Append(e.Guild.Name + " :: ");
-        builder.Append(e.Channel.Name + " :: ");
-        builder.Append(e.Author.Username + " :: ");
+        builder.Append(e.Guild.Name + "::");
+        builder.Append(e.Channel.Name + "::");
+        builder.Append(e.Author.Username + "::");
         builder.Append(e.Message.Content);
         Console.WriteLine(builder.ToString());
     }
