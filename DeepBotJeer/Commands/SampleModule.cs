@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -7,10 +9,17 @@ namespace SpaceBallsBot.Commands;
 
 public class SampleModule : BaseCommandModule
 {
-    [Command("test")]
-    public async Task GreetCommand(CommandContext ctx)
+    [Command("status")]
+    [Aliases("test")]
+    public async Task Status(CommandContext ctx)
     {
-        await ctx.RespondAsync("command executed");
+        var builder = new StringBuilder();
+        var assembly = Assembly.GetExecutingAssembly();
+        var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+
+        builder.AppendJoin(" ", "Currently running", fileVersionInfo.ProductName, "version",
+            fileVersionInfo.ProductVersion, "on", Environment.MachineName);
+        await ctx.RespondAsync(builder.ToString());
     }
 
     [Command("say")]

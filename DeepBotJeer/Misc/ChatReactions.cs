@@ -2,7 +2,7 @@ using System.Collections;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 
-namespace SpaceBallsBot;
+namespace SpaceballsBot.Misc;
 
 public static class ChatReactions
 {
@@ -39,7 +39,7 @@ public static class ChatReactions
         if (BombWords.Any(e.Message.Content.ToLower().Contains))
         {
             var response = CreateThreat();
-            await e.Channel.SendMessageAsync(response);
+            await e.Message.RespondAsync(response);
         }
 
         if (e.Message.Content.ToLower().Contains("zaza"))

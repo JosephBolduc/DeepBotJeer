@@ -6,15 +6,23 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <Company>Bolduc Engineering</Company>
-        <AssemblyVersion>1.0.0</AssemblyVersion>
-        <FileVersion>1.0.0</FileVersion>
+        <AssemblyVersion>1.1.0</AssemblyVersion>
+        <FileVersion>1.1.0</FileVersion>
         <IsPackable>false</IsPackable>
-        <Version>0.1.0</Version>
+        <Version>1.1.0</Version>
         <NeutralLanguage>en-US</NeutralLanguage>
         <ApplicationIcon>favicon.ico</ApplicationIcon>
         <AssemblyName>SpaceballsBot</AssemblyName>
         <RootNamespace>SpaceballsBot</RootNamespace>
         <Product>SpaceBallsBot</Product>
+        <Title>SpaceballsBot</Title>
+        <Authors>Bolduc Engineering</Authors>
+        <Copyright>2022</Copyright>
+        <PackageProjectUrl>https://github.com/JosephBolduc/DeepBotJeer</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/JosephBolduc/DeepBotJeer/blob/master/license</PackageLicenseUrl>
+        <PackageIcon>favicon.ico</PackageIcon>
+        <RepositoryUrl>https://github.com/JosephBolduc/DeepBotJeer</RepositoryUrl>
+        <RepositoryType>Git</RepositoryType>
     </PropertyGroup>
 
     <ItemGroup>

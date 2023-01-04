@@ -1,4 +1,4 @@
-namespace SpaceBallsBot;
+namespace SpaceballsBot.Misc;
 
 public static class Startup
 {
