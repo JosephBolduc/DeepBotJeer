@@ -1,6 +1,8 @@
 using DSharpPlus;
 using DSharpPlus.EventArgs;
 
+#pragma warning disable CS1998
+
 namespace SpaceballsBot.Event_Handlers;
 
 public class ClientErrored

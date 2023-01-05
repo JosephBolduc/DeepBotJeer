@@ -119,7 +119,11 @@ public static class ChatReactions
             "https://media.discordapp.net/attachments/813078853399478282/959886454669062214/funny.gif",
             "https://media.discordapp.net/attachments/838736235437883412/998292828910272612/94BBE4D0-73DD-4B50-868E-66C44B0464CD.gif",
             "https://media.discordapp.net/attachments/970512579321536523/1022027361161580564/4C93B042-327F-428E-BDF1-23E2C78C95DF.gif",
-            "https://media.discordapp.net/attachments/811646862729150555/937444902676099122/dserver2-1.gif"
+            "https://media.discordapp.net/attachments/811646862729150555/937444902676099122/dserver2-1.gif",
+            "https://media.discordapp.net/attachments/932072767405322370/1050469277410541648/me.gif",
+            "https://media.discordapp.net/attachments/1058586435931865108/1060262064565784636/C221E031-A4B2-49F3-87A8-53EB739CA989.gif",
+            "https://media.discordapp.net/attachments/921945359243153448/1057446056352292904/96446C8D-D1E2-4F15-922C-C2806F0CCEA1.gif",
+            "https://media.discordapp.net/attachments/986802453343264858/1033128801321897984/pills.gif"
         };
 
         int gifUrlIndex;
