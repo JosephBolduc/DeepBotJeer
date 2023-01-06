@@ -134,7 +134,7 @@ public class GuildEventModule : BaseCommandModule
     private static async Task EventLoop()
     {
         var activeEventIds = new HashSet<ulong>();
-        const double waitMinutes = .25;
+        const double waitMinutes = 5;
         const int hoursUntilNotify = 6;
         while (true)
         {
@@ -163,13 +163,13 @@ public class GuildEventModule : BaseCommandModule
         var timeDiff = startTime - DateTime.UtcNow;
 
         // How long before the event to ping people
-        var timeUntilEvent = TimeSpan.FromMinutes(3);
+        var timeUntilEvent = TimeSpan.FromMinutes(30);
 
         // How long after the initial ping to wait for emoji reactions and the @ready-GUID ping
         var timeBeforeEvent = timeDiff - timeUntilEvent;
 
         // How long after the game starts to delete the temporary roles
-        var timeAfterStart = TimeSpan.FromMinutes(5);
+        var timeAfterStart = TimeSpan.FromMinutes(30);
 
         var id = ExtractId(guildEvent);
 
@@ -222,7 +222,7 @@ public class GuildEventModule : BaseCommandModule
             DiscordEmoji.FromName(Program.DiscordClient, ":thumbsup:"));
 
         // Waits for 30 minutes until to ping people
-        var reactions = await reactionMessage.CollectReactionsAsync(TimeSpan.FromSeconds(30));
+        var reactions = await reactionMessage.CollectReactionsAsync(timeBeforeEvent);
 
         // Gets everyone who reacted to the message
         var reactors = new HashSet<DiscordUser>();
@@ -256,14 +256,14 @@ public class GuildEventModule : BaseCommandModule
         builder.Clear();
 
         // Give another half hour, will be at start time now
-        await Task.Delay(TimeSpan.FromSeconds(30));
+        await Task.Delay(timeUntilEvent);
         builder.Append(targetRole.Mention + " good luck on your ");
         builder.Append(guildEvent.Description.ToLower().Contains("match") ? "match " : "scrim ");
         builder.Append(":3");
         await general.SendMessageAsync(builder.ToString());
 
         // Wait for 10 minutes after the match starts
-        await Task.Delay(TimeSpan.FromSeconds(30));
+        await Task.Delay(timeAfterStart);
         await targetRole.DeleteAsync();
     }
 }
