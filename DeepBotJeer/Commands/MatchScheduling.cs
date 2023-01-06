@@ -86,7 +86,7 @@ public class MatchScheduling : BaseCommandModule
         Console.WriteLine("Loaded TF2 rosters");
     }
 
-    private static async Task UserToMember(CommandContext ctx, HashSet<DiscordUser> users,
+    public static async Task UserToMember(CommandContext ctx, HashSet<DiscordUser> users,
         HashSet<DiscordMember> members)
     {
         foreach (var user in users) members.Add(await ctx.Guild.GetMemberAsync(user.Id));

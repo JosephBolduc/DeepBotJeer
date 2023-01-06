@@ -4,12 +4,14 @@ public static class Startup
 {
     private const string TokenFile = "credentials.txt";
 
+    // Called by Main to create an empty token file if none and start garbage collection loop
     public static void Initialize()
     {
         if (!File.Exists(TokenFile)) File.Create(TokenFile);
         KickOffGCL();
     }
 
+    // Collects the bot token from either a file or environment var
     public static string GetToken()
     {
         var token = GetTokenFromFile();
@@ -32,11 +34,13 @@ public static class Startup
         return "";
     }
 
+    // Starts the garbage collection loop in a new thread
     private static void KickOffGCL()
     {
         _ = Task.Run(GarbageCollectionLoop);
     }
 
+    // Constantly runs the garbage collector because of Raspi memory issues
     private static void GarbageCollectionLoop()
     {
         while (true)

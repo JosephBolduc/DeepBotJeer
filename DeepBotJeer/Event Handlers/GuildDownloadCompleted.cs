@@ -11,6 +11,7 @@ public class GuildDownloadCompleted
     public static async Task Handler(DiscordClient s, GuildDownloadCompletedEventArgs e)
     {
         MatchScheduling.LoadRoster(s);
-        ScheduledGuildEventCreated.Initialize(s);
+        GuildEventModule.LoadEvents(s);
+        GuildEventModule.KickOffEventLoop(s);
     }
 }

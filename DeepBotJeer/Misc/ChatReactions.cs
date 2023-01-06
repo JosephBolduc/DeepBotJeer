@@ -45,9 +45,10 @@ public static class ChatReactions
         if (e.Message.Content.ToLower().Contains("zaza"))
             await e.Message.RespondAsync("when you outside and smell that zaza breh");
 
-        if (!TargetedUsers.Contains(e.Author.Id)) return;
+        // Commenting this out to be able to target all users lol
+        // if (!TargetedUsers.Contains(e.Author.Id)) return;
 
-        if (Rng.Next(30) == 0)
+        if (Rng.Next(60) == 0)
         {
             var response = RandomReactionGif();
             await e.Channel.SendMessageAsync(response);
