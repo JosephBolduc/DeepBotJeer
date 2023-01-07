@@ -10,10 +10,10 @@ public static class ChatReactions
 
     private static readonly ulong[] TargetedUsers =
     {
-        294937952314851329, // addison
-        241958250931683329, // hank
+        // 294937952314851329, // addison
+        // 241958250931683329, // hank
         254661838497644544, // ben
-        300507901892624385 // me
+        // 300507901892624385 // me
     };
 
     private static readonly string[] BombWords =
@@ -33,6 +33,7 @@ public static class ChatReactions
     };
 
     private static readonly ArrayList UsedGifIndexes = new();
+    private static readonly ArrayList UsedResponseIndexes = new();
 
     public static async void Handler(DiscordClient s, MessageCreateEventArgs e)
     {
@@ -45,14 +46,44 @@ public static class ChatReactions
         if (e.Message.Content.ToLower().Contains("zaza"))
             await e.Message.RespondAsync("when you outside and smell that zaza breh");
 
-        // Commenting this out to be able to target all users lol
-        // if (!TargetedUsers.Contains(e.Author.Id)) return;
-
         if (Rng.Next(60) == 0)
         {
             var response = RandomReactionGif();
             await e.Channel.SendMessageAsync(response);
+            return;
         }
+
+        // Only targeted users from this point on
+        if (!TargetedUsers.Contains(e.Author.Id)) return;
+
+        if (Rng.Next(10) == 0)
+        {
+            var response = RandomReply(out var sendMessage);
+            if (sendMessage) await e.Channel.SendMessageAsync(response);
+            else await e.Message.RespondAsync(response);
+        }
+    }
+
+    private static string RandomReply(out bool sendMessage)
+    {
+        sendMessage = false;
+        var replyChoice = Rng.Next(4);
+        string response;
+        switch (replyChoice)
+        {
+            case 1:
+                response = CreateThreat();
+                break;
+            case 2:
+                response = RandomReactionGif();
+                sendMessage = true;
+                break;
+            default:
+                response = TargetedResponse();
+                break;
+        }
+
+        return response;
     }
 
     private static string CreateThreat()
@@ -137,6 +168,37 @@ public static class ChatReactions
         UsedGifIndexes.Add(gifUrlIndex);
         if (gifUrls.Length == UsedGifIndexes.Count) UsedGifIndexes.Clear();
         return gifUrls[gifUrlIndex];
+    }
+
+    private static string TargetedResponse()
+    {
+        string[] targetedResponses =
+        {
+            "my fingers, your nose. do the math...",
+            "https://www.youtube.com/watch?v=Vlep1WFvLOI",
+            "i know where you live",
+            "im going to put my [redacted] in your [redacted]",
+            "im going to come to your house and force you to learn C++ and you're understand pointers whether you want to or not",
+            "obama balls in your mouth",
+            "Have any feature requests for Spaceballs Bot? Email me at ballsinyamouth@gmail.com!",
+            "wake up",
+            "Fact: this man gets pegged 3 times per week",
+            "Fact: this man in in the top 2% of redditors",
+            "Fact: this man is wanted in 12 counties for speeding in school zones",
+            "Fact: transitioning would have saved uncle ted",
+            "Fact: you are a pooron"
+        };
+
+        int responseIndex;
+        while (true)
+        {
+            responseIndex = Rng.Next(targetedResponses.Length);
+            if (!UsedResponseIndexes.Contains(responseIndex)) break;
+        }
+
+        UsedResponseIndexes.Add(responseIndex);
+        if (targetedResponses.Length == UsedResponseIndexes.Count) UsedResponseIndexes.Clear();
+        return targetedResponses[responseIndex];
     }
 
     private static string Exclam()
