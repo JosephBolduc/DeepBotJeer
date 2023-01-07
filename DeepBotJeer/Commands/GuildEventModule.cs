@@ -113,11 +113,24 @@ public class GuildEventModule : BaseCommandModule
     }
 
     // Finds the general text channel in a guild, if any
-    private static DiscordChannel FindGeneralChannel(DiscordGuild guild)
+    private static DiscordChannel FindAnnouncementsChannel(DiscordGuild guild)
     {
+        DiscordChannel? announcements = null;
+        DiscordChannel? general = null;
+
         foreach (var channel in guild.Channels.Values)
-            if (channel.Name.Equals("general"))
-                return channel;
+            switch (channel.Name)
+            {
+                case "announcements":
+                    announcements = channel;
+                    break;
+                case "general":
+                    general = channel;
+                    break;
+            }
+
+        if (announcements != null) return announcements;
+        if (general != null) return general;
         return guild.GetDefaultChannel();
     }
 
@@ -134,7 +147,7 @@ public class GuildEventModule : BaseCommandModule
     private static async Task EventLoop()
     {
         var activeEventIds = new HashSet<ulong>();
-        const double waitMinutes = .25;
+        const double waitMinutes = 6;
         const int hoursUntilNotify = 6;
         while (true)
         {
@@ -163,13 +176,13 @@ public class GuildEventModule : BaseCommandModule
         var timeDiff = startTime - DateTime.UtcNow;
 
         // How long before the event to ping people
-        var timeUntilEvent = TimeSpan.FromMinutes(3);
+        var timeUntilEvent = TimeSpan.FromMinutes(30);
 
         // How long after the initial ping to wait for emoji reactions and the @ready-GUID ping
         var timeBeforeEvent = timeDiff - timeUntilEvent;
 
         // How long after the game starts to delete the temporary roles
-        var timeAfterStart = TimeSpan.FromMinutes(5);
+        var timeAfterStart = TimeSpan.FromMinutes(30);
 
         var id = ExtractId(guildEvent);
 
@@ -192,61 +205,68 @@ public class GuildEventModule : BaseCommandModule
             if (role.Name.Equals("ready-" + id)) targetRole = role;
         }
 
-        // Makes sure that the event hasn't been processed yet
-        // If it has, kills the thread
+
+        var roleCreated = false;
         if (targetRole != null)
         {
-            Console.WriteLine("Picked up unfinished event, killing thread...");
-            return;
+            Console.WriteLine("Picked up unfinished event, continuing thread...");
+            roleCreated = true;
         }
 
-
-        targetRole = await guildEvent.Guild.CreateRoleAsync("ready-" + id, Permissions.None, DiscordColor.Gold, false,
-            true,
-            "Why are you reading the audit logs you nerd redditor?");
-
         var builder = new StringBuilder();
-        builder.Append("Hey ");
-        if (guildEvent.Description.ToLower().Contains("rgl")) builder.Append(rglRole?.Mention);
-        if (guildEvent.Description.ToLower().Contains("ugc")) builder.Append(ugcRole?.Mention);
-        builder.Append(", theres going to be a ");
-        builder.Append(guildEvent.Description.ToLower().Contains("match") ? "match " : "scrim ");
-        builder.AppendLine("in about " + timeDiff.TotalHours.ToString()[..5] + " hours");
-        builder.AppendLine("If you can make it, react any emoji to this message");
+        var general = FindAnnouncementsChannel(guildEvent.Guild);
+        if (!roleCreated)
+        {
+            targetRole = await guildEvent.Guild.CreateRoleAsync("ready-" + id, Permissions.None, DiscordColor.Gold,
+                false,
+                true,
+                "Why are you reading the audit logs you nerd redditor?");
 
-        var general = FindGeneralChannel(guildEvent.Guild);
 
-        var reactionMessage = await general.SendMessageAsync(builder.ToString());
-        builder.Clear();
-        await reactionMessage.CreateReactionAsync(
-            DiscordEmoji.FromName(Program.DiscordClient, ":thumbsup:"));
+            builder.Append("Hey ");
+            if (guildEvent.Description.ToLower().Contains("rgl")) builder.Append(rglRole?.Mention);
+            if (guildEvent.Description.ToLower().Contains("ugc")) builder.Append(ugcRole?.Mention);
+            builder.Append(", theres going to be a ");
+            builder.Append(guildEvent.Description.ToLower().Contains("match") ? "match " : "scrim ");
+            builder.AppendLine("in about " + timeDiff.TotalHours.ToString()[..5] + " hours");
+            builder.AppendLine("If you can make it, react any emoji to this message");
 
-        // Waits for 30 minutes until to ping people
-        var reactions = await reactionMessage.CollectReactionsAsync(TimeSpan.FromSeconds(30));
 
-        // Gets everyone who reacted to the message
-        var reactors = new HashSet<DiscordUser>();
-        foreach (var reaction in reactions)
-        foreach (var user in reaction.Users)
-            if (!user.IsBot)
-                reactors.Add(user);
-        var guildReactors = new HashSet<ulong>();
-        foreach (var reactor in reactors) guildReactors.Add(reactor.Id);
+            var reactionMessage = await general.SendMessageAsync(builder.ToString());
+            builder.Clear();
+            await reactionMessage.CreateReactionAsync(
+                DiscordEmoji.FromName(Program.DiscordClient, ":thumbsup:"));
 
-        Console.WriteLine("before adding roles");
-        foreach (var memberID in guildReactors)
-            try
-            {
-                var member = await Program.DiscordClient.Guilds[guildEvent.GuildId].GetMemberAsync(memberID);
+            // Waits for 30 minutes until to ping people
+            var reactions = await reactionMessage.CollectReactionsAsync(timeBeforeEvent);
 
-                Console.WriteLine(member.Nickname);
-                await member.GrantRoleAsync(targetRole);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            // Gets everyone who reacted to the message
+            var reactors = new HashSet<DiscordUser>();
+            foreach (var reaction in reactions)
+            foreach (var user in reaction.Users)
+                if (!user.IsBot)
+                    reactors.Add(user);
+            var guildReactors = new HashSet<ulong>();
+            foreach (var reactor in reactors) guildReactors.Add(reactor.Id);
+
+            Console.WriteLine("before adding roles");
+            foreach (var memberID in guildReactors)
+                try
+                {
+                    var member = await Program.DiscordClient.Guilds[guildEvent.GuildId].GetMemberAsync(memberID);
+
+                    Console.WriteLine(member.Nickname);
+                    await member.GrantRoleAsync(targetRole);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
+        }
+
+        // Simulates the timeout for reactions
+        if (roleCreated) await Task.Delay(timeBeforeEvent);
 
         builder.Append("Just a heads up, the ");
         builder.Append(guildEvent.Description.ToLower().Contains("match") ? "match " : "scrim ");
@@ -256,14 +276,14 @@ public class GuildEventModule : BaseCommandModule
         builder.Clear();
 
         // Give another half hour, will be at start time now
-        await Task.Delay(TimeSpan.FromSeconds(30));
+        await Task.Delay(timeUntilEvent);
         builder.Append(targetRole.Mention + " good luck on your ");
         builder.Append(guildEvent.Description.ToLower().Contains("match") ? "match " : "scrim ");
         builder.Append(":3");
         await general.SendMessageAsync(builder.ToString());
 
         // Wait for 10 minutes after the match starts
-        await Task.Delay(TimeSpan.FromSeconds(30));
+        await Task.Delay(timeAfterStart);
         await targetRole.DeleteAsync();
     }
 }

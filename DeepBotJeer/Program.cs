@@ -34,7 +34,7 @@ internal static class Program
 
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration
         {
-            StringPrefixes = new[] { "tfdev_" },
+            StringPrefixes = new[] { "tfprod" },
             CaseSensitive = false
         });
 
