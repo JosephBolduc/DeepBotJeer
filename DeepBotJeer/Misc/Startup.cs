@@ -14,7 +14,7 @@ public static class Startup
     // Collects the bot token from either a file or environment var
     public static string GetToken()
     {
-        var token = GetTokenFromFile();
+        string token = GetTokenFromFile();
         if (token != "") return token;
 
         token = GetTokenFromEnv();
@@ -24,7 +24,7 @@ public static class Startup
     private static string GetTokenFromFile()
     {
         Console.WriteLine("Reading token from file");
-        var fileText = File.ReadAllText(TokenFile);
+        string fileText = File.ReadAllText(TokenFile);
         return fileText;
     }
 

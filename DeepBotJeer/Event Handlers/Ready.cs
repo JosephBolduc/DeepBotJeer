@@ -8,7 +8,7 @@ public class Ready
 {
     public static async Task Handler(DiscordClient s, ReadyEventArgs e)
     {
-        var discordActivity = new DiscordActivity("Weezer", ActivityType.ListeningTo);
+        DiscordActivity discordActivity = new("Weezer", ActivityType.ListeningTo);
         await s.UpdateStatusAsync(userStatus: UserStatus.Online, activity: discordActivity);
     }
 }

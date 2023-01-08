@@ -1,8 +1,10 @@
+using System.Collections.ObjectModel;
 using System.Text;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.EventHandling;
 using DSharpPlus.Interactivity.Extensions;
 
 #pragma warning disable CS1998
@@ -17,27 +19,27 @@ public class MatchScheduling : BaseCommandModule
     [Command("ready_up")]
     public async Task ReadyUp(CommandContext ctx, double timeOut)
     {
-        var message = await ctx.RespondAsync("React if you can make todays game");
+        DiscordMessage message = await ctx.RespondAsync("React if you can make todays game");
         await message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":thumbsup:"));
-        var reactions = await message.CollectReactionsAsync(TimeSpan.FromSeconds(timeOut));
+        ReadOnlyCollection<Reaction>? reactions = await message.CollectReactionsAsync(TimeSpan.FromSeconds(timeOut));
 
-        var reactors = new HashSet<DiscordUser>();
-        foreach (var reaction in reactions)
-        foreach (var user in reaction.Users)
-            if (!user.IsBot)
-                reactors.Add(user);
+        HashSet<DiscordUser> reactors = new();
+        foreach (Reaction? reaction in reactions)
+            foreach (DiscordUser? user in reaction.Users)
+                if (!user.IsBot)
+                    reactors.Add(user);
 
-        var guildReactors = new HashSet<DiscordMember>();
+        HashSet<DiscordMember> guildReactors = new();
         await UserToMember(ctx, reactors, guildReactors);
 
-        var tagRole = await ctx.Guild.CreateRoleAsync("Ready", Permissions.None,
+        DiscordRole? tagRole = await ctx.Guild.CreateRoleAsync("Ready", Permissions.None,
             DiscordColor.Green,
             false, true, "Readied up for gaming!");
 
-        foreach (var member in guildReactors) await member.GrantRoleAsync(tagRole);
+        foreach (DiscordMember member in guildReactors) await member.GrantRoleAsync(tagRole);
         await Task.Delay(60 * (int)timeOut);
 
-        foreach (var member in guildReactors) await member.RevokeRoleAsync(tagRole);
+        foreach (DiscordMember member in guildReactors) await member.RevokeRoleAsync(tagRole);
         await tagRole.DeleteAsync();
     }
 
@@ -45,13 +47,13 @@ public class MatchScheduling : BaseCommandModule
     [Command("list_roster")]
     public async Task ListRoster(CommandContext ctx)
     {
-        var builder = new StringBuilder();
+        StringBuilder builder = new();
         builder.AppendLine("RGL Roster:");
-        foreach (var player in RglRoster) builder.AppendLine(player.DisplayName);
+        foreach (DiscordMember player in RglRoster) builder.AppendLine(player.DisplayName);
         await ctx.RespondAsync(builder.ToString());
         builder.Clear();
         builder.AppendLine("UGC Roster:");
-        foreach (var player in UgcRoster) builder.AppendLine(player.DisplayName);
+        foreach (DiscordMember player in UgcRoster) builder.AppendLine(player.DisplayName);
         await ctx.Channel.SendMessageAsync(builder.ToString());
     }
 
@@ -70,18 +72,18 @@ public class MatchScheduling : BaseCommandModule
 
     private static void LoadRoster(IReadOnlyDictionary<ulong, DiscordGuild> clientGuilds)
     {
-        foreach (var guild in clientGuilds)
-        foreach (var member in guild.Value.Members)
-        foreach (var role in member.Value.Roles)
-            switch (role.Name)
-            {
-                case "RGL":
-                    RglRoster.Add(member.Value);
-                    break;
-                case "UGC":
-                    UgcRoster.Add(member.Value);
-                    break;
-            }
+        foreach (KeyValuePair<ulong, DiscordGuild> guild in clientGuilds)
+            foreach (KeyValuePair<ulong, DiscordMember> member in guild.Value.Members)
+                foreach (DiscordRole? role in member.Value.Roles)
+                    switch (role.Name)
+                    {
+                        case "RGL":
+                            RglRoster.Add(member.Value);
+                            break;
+                        case "UGC":
+                            UgcRoster.Add(member.Value);
+                            break;
+                    }
 
         Console.WriteLine("Loaded TF2 rosters");
     }
@@ -89,6 +91,6 @@ public class MatchScheduling : BaseCommandModule
     public static async Task UserToMember(CommandContext ctx, HashSet<DiscordUser> users,
         HashSet<DiscordMember> members)
     {
-        foreach (var user in users) members.Add(await ctx.Guild.GetMemberAsync(user.Id));
+        foreach (DiscordUser user in users) members.Add(await ctx.Guild.GetMemberAsync(user.Id));
     }
 }

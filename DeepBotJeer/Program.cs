@@ -13,35 +13,28 @@ internal static class Program
 {
     public static DiscordClient? DiscordClient;
 
-    private static void Main(string[] arfs)
+    private static async Task Main()
     {
-        // var assembly = Assembly.GetExecutingAssembly();
-        // Console.Title = assembly.FullName;
-
         Startup.Initialize();
-        var token = Startup.GetToken();
-        MainAsync(token).GetAwaiter().GetResult();
-    }
+        string token = Startup.GetToken();
 
-    private static async Task MainAsync(string token)
-    {
-        var discord = new DiscordClient(new DiscordConfiguration
+        DiscordClient discord = new(new DiscordConfiguration
         {
             Token = token,
             TokenType = TokenType.Bot,
-            Intents = DiscordIntents.All
+            Intents = DiscordIntents.All,
         });
 
-        var commands = discord.UseCommandsNext(new CommandsNextConfiguration
+        CommandsNextExtension commands = discord.UseCommandsNext(new CommandsNextConfiguration
         {
             StringPrefixes = new[] { "tfprod" },
-            CaseSensitive = false
+            CaseSensitive = false,
         });
 
         discord.UseInteractivity(new InteractivityConfiguration
         {
             PollBehaviour = PollBehaviour.KeepEmojis,
-            Timeout = TimeSpan.FromSeconds(20)
+            Timeout = TimeSpan.FromSeconds(20),
         });
 
         DiscordClient = discord;

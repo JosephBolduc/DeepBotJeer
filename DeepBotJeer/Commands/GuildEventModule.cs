@@ -1,8 +1,10 @@
+using System.Collections.ObjectModel;
 using System.Text;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.EventHandling;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.Net.Models;
 
@@ -15,8 +17,8 @@ public class GuildEventModule : BaseCommandModule
     [Command("list_events")]
     public async Task ListEvents(CommandContext ctx)
     {
-        var builder = new StringBuilder();
-        foreach (var guildEvent in EventList)
+        StringBuilder builder = new();
+        foreach (DiscordScheduledGuildEvent guildEvent in EventList)
             builder.AppendLine(guildEvent.Guild.Name + " - " + guildEvent.Name + " - " + guildEvent.Description);
         await ctx.RespondAsync(builder.ToString());
     }
@@ -24,9 +26,9 @@ public class GuildEventModule : BaseCommandModule
     [Command("load_events")]
     public async Task LoadEvents(CommandContext ctx)
     {
-        var eventCount = EventList.Count;
+        int eventCount = EventList.Count;
         LoadEvents(ctx.Client);
-        var builder = new StringBuilder();
+        StringBuilder builder = new();
         builder.AppendLine("Added " + eventCount + " new items");
         builder.AppendLine("Currently tracking " + EventList.Count + " items");
         await ctx.RespondAsync(builder.ToString());
@@ -35,9 +37,9 @@ public class GuildEventModule : BaseCommandModule
     // Takes a DiscordClient object, finds all relevant events, and loads them into EventList (actually a set but whatever)
     public static async void LoadEvents(DiscordClient s)
     {
-        foreach (var guild in s.Guilds.Values)
-        foreach (var scheduledEvent in await guild.GetEventsAsync())
-            AddEvent(scheduledEvent);
+        foreach (DiscordGuild? guild in s.Guilds.Values)
+            foreach (DiscordScheduledGuildEvent? scheduledEvent in await guild.GetEventsAsync())
+                AddEvent(scheduledEvent);
         Console.WriteLine("Loaded guild events");
     }
 
@@ -45,7 +47,7 @@ public class GuildEventModule : BaseCommandModule
     public static void AddEvent(DiscordScheduledGuildEvent guildEvent)
     {
         if (!EventFilter(guildEvent)) return;
-        foreach (var item in EventList)
+        foreach (DiscordScheduledGuildEvent item in EventList)
         {
             if (guildEvent.Id != item.Id) continue;
             EventList.Remove(item);
@@ -67,7 +69,7 @@ public class GuildEventModule : BaseCommandModule
             if (guildEvent.Description.Contains("ID: {")) return;
 
             Console.WriteLine("Stamping " + guildEvent.Name);
-            var builder = new StringBuilder();
+            StringBuilder builder = new();
             builder.AppendLine(guildEvent.Description);
             builder.AppendLine();
             builder.AppendLine();
@@ -77,9 +79,9 @@ public class GuildEventModule : BaseCommandModule
             model.Description = builder.ToString();
         }
 
-        var title = guildEvent.Name;
-        var description = guildEvent.Description;
-        var fullEventText = title + description;
+        string? title = guildEvent.Name;
+        string? description = guildEvent.Description;
+        string fullEventText = title + description;
         fullEventText = fullEventText.ToLower();
 
         if (!fullEventText.Contains("rgl") && !fullEventText.Contains("ugc")) return false;
@@ -97,14 +99,14 @@ public class GuildEventModule : BaseCommandModule
     {
         try
         {
-            var description = guildEvent.Description;
+            string? description = guildEvent.Description;
             description = description.Substring(description.IndexOf("ID: {"));
             description = description.Substring(5, 8);
             return description;
         }
         catch (Exception e)
         {
-            var description = Program.DiscordClient.Guilds[guildEvent.GuildId].ScheduledEvents[guildEvent.Id]
+            string? description = Program.DiscordClient.Guilds[guildEvent.GuildId].ScheduledEvents[guildEvent.Id]
                 .Description;
             description = description.Substring(description.IndexOf("ID: {"));
             description = description.Substring(5, 8);
@@ -118,7 +120,7 @@ public class GuildEventModule : BaseCommandModule
         DiscordChannel? announcements = null;
         DiscordChannel? general = null;
 
-        foreach (var channel in guild.Channels.Values)
+        foreach (DiscordChannel? channel in guild.Channels.Values)
             switch (channel.Name)
             {
                 case "announcements":
@@ -146,7 +148,7 @@ public class GuildEventModule : BaseCommandModule
     // Runs every 5 minutes
     private static async Task EventLoop()
     {
-        var activeEventIds = new HashSet<ulong>();
+        HashSet<ulong> activeEventIds = new();
         const double waitMinutes = 6;
         const int hoursUntilNotify = 6;
         while (true)
@@ -154,10 +156,10 @@ public class GuildEventModule : BaseCommandModule
             await Task.Delay((int)(waitMinutes * 60 * 1000));
             Console.WriteLine("Ran event loop");
 
-            foreach (var guildEvent in EventList)
+            foreach (DiscordScheduledGuildEvent guildEvent in EventList)
             {
-                var startTime = guildEvent.StartTime.DateTime;
-                var timeDiff = startTime - DateTime.UtcNow;
+                DateTime startTime = guildEvent.StartTime.DateTime;
+                TimeSpan timeDiff = startTime - DateTime.UtcNow;
 
                 // Kicks off thread if there less than 6 hours 'til and its ID isn't in the set
                 if (timeDiff.TotalHours < hoursUntilNotify && !activeEventIds.Contains(guildEvent.Id))
@@ -172,25 +174,25 @@ public class GuildEventModule : BaseCommandModule
 
     private static async Task IndividualEventChecker(DiscordScheduledGuildEvent guildEvent)
     {
-        var startTime = guildEvent.StartTime.DateTime;
-        var timeDiff = startTime - DateTime.UtcNow;
+        DateTime startTime = guildEvent.StartTime.DateTime;
+        TimeSpan timeDiff = startTime - DateTime.UtcNow;
 
         // How long before the event to ping people
-        var timeUntilEvent = TimeSpan.FromMinutes(30);
+        TimeSpan timeUntilEvent = TimeSpan.FromMinutes(30);
 
         // How long after the initial ping to wait for emoji reactions and the @ready-GUID ping
-        var timeBeforeEvent = timeDiff - timeUntilEvent;
+        TimeSpan timeBeforeEvent = timeDiff - timeUntilEvent;
 
         // How long after the game starts to delete the temporary roles
-        var timeAfterStart = TimeSpan.FromMinutes(30);
+        TimeSpan timeAfterStart = TimeSpan.FromMinutes(30);
 
-        var id = ExtractId(guildEvent);
+        string id = ExtractId(guildEvent);
 
         DiscordRole? targetRole = null;
         DiscordRole? rglRole = null;
         DiscordRole? ugcRole = null;
 
-        foreach (var role in guildEvent.Guild.Roles.Values)
+        foreach (DiscordRole? role in guildEvent.Guild.Roles.Values)
         {
             switch (role.Name.ToLower())
             {
@@ -206,15 +208,15 @@ public class GuildEventModule : BaseCommandModule
         }
 
 
-        var roleCreated = false;
+        bool roleCreated = false;
         if (targetRole != null)
         {
             Console.WriteLine("Picked up unfinished event, continuing thread...");
             roleCreated = true;
         }
 
-        var builder = new StringBuilder();
-        var general = FindAnnouncementsChannel(guildEvent.Guild);
+        StringBuilder builder = new();
+        DiscordChannel general = FindAnnouncementsChannel(guildEvent.Guild);
         if (!roleCreated)
         {
             targetRole = await guildEvent.Guild.CreateRoleAsync("ready-" + id, Permissions.None, DiscordColor.Gold,
@@ -232,28 +234,29 @@ public class GuildEventModule : BaseCommandModule
             builder.AppendLine("If you can make it, react any emoji to this message");
 
 
-            var reactionMessage = await general.SendMessageAsync(builder.ToString());
+            DiscordMessage? reactionMessage = await general.SendMessageAsync(builder.ToString());
             builder.Clear();
             await reactionMessage.CreateReactionAsync(
                 DiscordEmoji.FromName(Program.DiscordClient, ":thumbsup:"));
 
             // Waits for 30 minutes until to ping people
-            var reactions = await reactionMessage.CollectReactionsAsync(timeBeforeEvent);
+            ReadOnlyCollection<Reaction>? reactions = await reactionMessage.CollectReactionsAsync(timeBeforeEvent);
 
             // Gets everyone who reacted to the message
-            var reactors = new HashSet<DiscordUser>();
-            foreach (var reaction in reactions)
-            foreach (var user in reaction.Users)
-                if (!user.IsBot)
-                    reactors.Add(user);
-            var guildReactors = new HashSet<ulong>();
-            foreach (var reactor in reactors) guildReactors.Add(reactor.Id);
+            HashSet<DiscordUser> reactors = new();
+            foreach (Reaction? reaction in reactions)
+                foreach (DiscordUser? user in reaction.Users)
+                    if (!user.IsBot)
+                        reactors.Add(user);
+            HashSet<ulong> guildReactors = new();
+            foreach (DiscordUser reactor in reactors) guildReactors.Add(reactor.Id);
 
             Console.WriteLine("before adding roles");
-            foreach (var memberID in guildReactors)
+            foreach (ulong memberID in guildReactors)
                 try
                 {
-                    var member = await Program.DiscordClient.Guilds[guildEvent.GuildId].GetMemberAsync(memberID);
+                    DiscordMember? member =
+                        await Program.DiscordClient.Guilds[guildEvent.GuildId].GetMemberAsync(memberID);
 
                     Console.WriteLine(member.Nickname);
                     await member.GrantRoleAsync(targetRole);

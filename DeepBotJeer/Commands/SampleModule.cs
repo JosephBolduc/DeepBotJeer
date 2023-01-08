@@ -25,7 +25,7 @@ public class SampleModule : BaseCommandModule
     [RequireOwner]
     public async Task Say(CommandContext ctx, DiscordChannel channel, params string[] content)
     {
-        var builder = new StringBuilder();
+        StringBuilder builder = new();
         builder.AppendJoin(' ', content);
         await channel.SendMessageAsync(builder.ToString());
     }
