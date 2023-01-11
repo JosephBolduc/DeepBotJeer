@@ -27,7 +27,7 @@ internal static class Program
 
         CommandsNextExtension commands = discord.UseCommandsNext(new CommandsNextConfiguration
         {
-            StringPrefixes = new[] { "tfprod" },
+            StringPrefixes = new[] { "tfdev" },
             CaseSensitive = false,
         });
 
@@ -40,7 +40,6 @@ internal static class Program
         DiscordClient = discord;
 
         commands.RegisterCommands<SampleModule>();
-        commands.RegisterCommands<GuildEventModule>();
         commands.RegisterCommands<MatchScheduling>();
 
         discord.Ready += Ready.Handler;

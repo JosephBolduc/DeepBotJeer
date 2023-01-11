@@ -8,7 +8,7 @@ public static class Startup
     public static void Initialize()
     {
         if (!File.Exists(TokenFile)) File.Create(TokenFile);
-        KickOffGCL();
+        Task.Run(GarbageCollectionLoop);
     }
 
     // Collects the bot token from either a file or environment var
@@ -34,18 +34,13 @@ public static class Startup
         return "";
     }
 
-    // Starts the garbage collection loop in a new thread
-    private static void KickOffGCL()
-    {
-        _ = Task.Run(GarbageCollectionLoop);
-    }
-
     // Constantly runs the garbage collector because of Raspi memory issues
-    private static void GarbageCollectionLoop()
+    // Maybe it isn't needed anymore but idk
+    private static async Task GarbageCollectionLoop()
     {
         while (true)
         {
-            Thread.Sleep(60 * 1000);
+            await Task.Delay(5 * 60 * 1000);
             GC.Collect();
             // Console.WriteLine("Ran GC");
         }

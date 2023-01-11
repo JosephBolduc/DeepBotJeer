@@ -1,6 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using SpaceBallsBot.Commands;
+using SpaceballsBot.Misc;
 
 #pragma warning disable CS1998
 
@@ -10,6 +10,6 @@ public class ScheduledGuildEventCreated
 {
     public static async Task Handler(DiscordClient s, ScheduledGuildEventCreateEventArgs e)
     {
-        GuildEventModule.AddEvent(e.Event);
+        GuildEventManager.ProcessEvent(e.Event);
     }
 }

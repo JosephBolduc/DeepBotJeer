@@ -46,6 +46,10 @@ public static class ChatReactions
         if (e.Message.Content.ToLower().Contains("zaza"))
             await e.Message.RespondAsync("when you outside and smell that zaza breh");
 
+        if (e.Message.Content.ToLower().Contains("troll"))
+            await e.Message.RespondAsync(
+                "https://cdn.discordapp.com/attachments/1037899375214592050/1047278726783709234/cum_nuts.PNG");
+
         if (Rng.Next(60) == 0)
         {
             string response = RandomReactionGif();
@@ -53,10 +57,11 @@ public static class ChatReactions
             return;
         }
 
+
         // Only targeted users from this point on
         if (!TargetedUsers.Contains(e.Author.Id)) return;
 
-        if (Rng.Next(10) == 0)
+        if (Rng.Next(5) == 0)
         {
             string response = RandomReply(out bool sendMessage);
             if (sendMessage) await e.Channel.SendMessageAsync(response);
